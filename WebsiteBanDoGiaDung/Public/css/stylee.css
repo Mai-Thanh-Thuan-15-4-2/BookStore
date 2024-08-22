@@ -1,7 +1,6 @@
-﻿/*!
+﻿﻿ /*!
 * 16520
 */
-
 * {
 	padding: 0;
 	margin: 0;
@@ -103,13 +102,13 @@ button:focus {
 		font-size: 15px;
 	}
 
-/*Main menu left*/
-
+/* Main menu left */
 .home-slider .main-menu {
 	position: absolute;
 	width: 250px;
 	background: #fff;
 	z-index: 99;
+	box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
 }
 
 nav ul {
@@ -117,9 +116,8 @@ nav ul {
 	width: 250px;
 	line-height: 30px;
 	border-bottom: 1px solid #ccc;
-	box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
-	z-index: 2;
-	margin-bottom: 0;
+	margin: 0; /* Đảm bảo không có lề thừa */
+	padding: 0; /* Đảm bảo không có padding thừa */
 }
 
 	nav ul li {
@@ -135,23 +133,21 @@ nav a {
 	display: block;
 	color: #333;
 	font-size: 14px;
+	text-decoration: none;
 }
 
 	nav a:after {
 		position: absolute;
-		font-family: " Fira Sans Two";
-		content: "\f105";
+		font-family: "Font Awesome 5 Free"; /* Ensure Font Awesome is correctly loaded */
+		content: "\f105"; /* This should match the correct icon in Font Awesome */
 		right: 20px;
-		content: "›";
 		font-weight: bold;
-		/*Chỉnh lên font đậm để không lỗi icon */
 	}
 
 	nav a:hover {
 		background: #d5ffd5;
 		font-weight: bold;
 		color: #238b22;
-		text-decoration: none;
 	}
 
 nav li:hover {
@@ -161,18 +157,19 @@ nav li:hover {
 nav ul ul {
 	display: none;
 	position: absolute;
-}
-
-nav li:hover ul {
-	display: block;
-}
-
-nav ul ul {
+	top: 0;
+	left: 100%; /* Ensure submenu is positioned to the right of the parent */
+	margin: 0; /* Remove any margin to avoid unwanted spacing */
+	padding: 0; /* Remove any padding to avoid unwanted spacing */
 	min-height: 200px;
 	width: 300px;
-	top: 0;
-	margin-left: 235px;
 	background: #fff;
+	border: 1px solid #ccc;
+	box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+nav li:hover > ul {
+	display: block;
 }
 
 nav li li {
@@ -181,28 +178,19 @@ nav li li {
 }
 
 	nav li li a:hover {
-		background: 0;
-		
-	}
-
-	nav li li:hover {
-		border-left: 0;
-		background: #a7ff4152;
+		background: #a7ff4152; /* Light background on hover */
+		color: #333; /* Ensure text color remains readable */
 	}
 
 	nav li li a {
-		width: 80%;
-		float: left;
+		width: 100%; /* Full width for submenu items */
+		padding-left: 20px; /* Align with parent menu items */
 	}
 
 		nav li li a:after {
-			position: absolute;
-			font-family: "Font Awesome 5 Free";
-			content: "";
-			right: 20px;
+			content: ""; /* No icon in submenu items */
 		}
 
-/*.End*/
 
 .home-slider .slider {
 	padding-top: 8px;
@@ -417,6 +405,7 @@ nav li li {
 	padding: 5px 0;
 	min-height: 360px;
 }
+
 	.t-item:hover {
 		box-shadow: rgb(0 0 0 / 15%) 0px 5px 20px;
 		z-index: 10000;
@@ -470,10 +459,12 @@ nav li li {
 		font-size: 14px;
 		word-break: break-word;
 	}
+
 		.t-item .t-np:hover {
 			color: #12c011;
 			font-weight: 500;
 		}
+
 	.t-item .price {
 		font-size: 17px;
 		padding-left: 20px;
@@ -521,7 +512,7 @@ nav li li {
 .news-home .bu-right {
 	width: 45%;
 	background: #fff;
-	padding-left: 65px;
+	padding-left: 15px;
 	z-index: 1;
 	float: left;
 	margin: 5px 30px 5px -50px;

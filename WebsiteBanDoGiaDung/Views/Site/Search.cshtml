@@ -31,11 +31,6 @@
                     Tìm thấy <b class="d-inline">@ViewBag.Count</b> kết quả phù hợp
                 </small>
             </div>
-            @*<div class="py-2 border-bottom px-3">
-                <div class="btn btn-primary px-3 py-1 my-2 mt-3"> <small> test(1)</small></div>
-                <div class="btn btn-outline-primary px-3 py-1 my-2 mt-3"> <small>test(1)</small></div>
-                <div class="btn btn-outline-primary px-3 py-1 my-2 mt-3"> <small> test(1)</small></div>
-            </div>*@
 
             <div class="" style="position: relative;min-height:800px">
                 @foreach (var s in Model)
@@ -46,7 +41,6 @@
                                 <img src="~/Public/images/products/@s.Image" alt="" class="beau">
                                 @if (s.Installment == 1)
                                 {
-                                    
                                 }
                             </div>
                             <div class="couple">
@@ -84,6 +78,43 @@
     </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.querySelector('.form-search-top input[name="key"]');
+        const suggestionsBox = document.createElement('div');
+        suggestionsBox.className = 'search-suggestions';
+        suggestionsBox.style.position = 'absolute';
+        suggestionsBox.style.backgroundColor = '#fff';
+        suggestionsBox.style.border = '1px solid #ddd';
+        suggestionsBox.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+        suggestionsBox.style.zIndex = 1000;
 
+        searchInput.parentElement.appendChild(suggestionsBox);
 
+        searchInput.addEventListener('input', function () {
+            const query = this.value.trim();
+            if (query.length > 2) {
+                fetch(`/Site/SearchAutocomplete?term=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = '';
+                        data.forEach(item => {
+                            const suggestionItem = document.createElement('div');
+                            suggestionItem.className = 'suggestion-item';
+                            suggestionItem.innerHTML = `<a href="/products/${item.value}">${item.label}</a>`;
+                            suggestionsBox.appendChild(suggestionItem);
+                        });
+                    });
+            } else {
+                suggestionsBox.innerHTML = '';
+            }
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!searchInput.contains(event.target) && !suggestionsBox.contains(event.target)) {
+                suggestionsBox.innerHTML = '';
+            }
+        });
+    });
+</script>
 

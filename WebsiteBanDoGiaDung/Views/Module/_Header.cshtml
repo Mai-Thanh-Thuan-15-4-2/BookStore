@@ -1,22 +1,49 @@
 ﻿@model IEnumerable<WebsiteBanDoGiaDung.Models.MCategory>
+
 <style>
-    ::placeholder{
-        color:#000;
+    ::placeholder {
+        color: #000;
     }
+
+    .search-suggestions {
+        position: absolute;
+        background: #fff;
+        border: 1px solid #ddd;
+        max-height: 200px;
+        overflow-y: auto;
+        width: 450px;
+        display: none;
+        z-index: 1000;
+    }
+
+    .suggestion-item {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+        .suggestion-item a {
+            color: #333;
+            text-decoration: none;
+            display: block;
+        }
+
+            .suggestion-item a:hover {
+                background: #f5f5f5;
+            }
 </style>
+
 <header>
-    <div class="" style="background: #201ff2; height: 30px; line-height: 30px; ">
+    <div class="" style="background: #201ff2; height: 30px; line-height: 30px;">
         <div class="container-91 text-right">
             <small>
                 @Html.Action("MainMenu", "Module")
             </small>
         </div>
     </div>
-    <div class="wrapt" style="background: #001169">
+    <div class="wrapt" style="background: #001169; position: relative;">
         <div class="row container-91">
             <div class="col-sm-3 text-light float-left">
-                <a href="/"
-                   class="d-block text-decoration-none h3 text-center pt-2 text-white font-weight-bold">
+                <a href="/" class="d-block text-decoration-none h3 text-center pt-2 text-white font-weight-bold">
                     &#128218; Laptrinh.com
                 </a>
             </div>
@@ -26,6 +53,8 @@
                     <input class="in-search text-primary" type="text" style="font-size: 14px;width:450px;" placeholder="Bạn cần tìm gì?..." name="key" value="@(Session["keywords"] ?? "")">
                     <button class="bt-search" type="submit"><i class="fas fa-search" style="color: #2196f3;"></i></button>
                 }
+                <!-- Thêm hộp gợi ý tìm kiếm -->
+                <div class="search-suggestions"></div>
             </div>
             <div class="col-sm-4 float-left pt-1">
                 <div class="cart float-left pr-2" style="margin-top:-6px;margin-left:20px;">
@@ -73,7 +102,6 @@
                                                    data-id="@c.ProductID" title="Xóa khỏi giỏ hàng"><i class="fas fa-times-circle"></i></a>
                                             </div>
                                         </div>
-
                                     </li>
                                 }
                                 <div class="row mb-3 mt-2 clearfix">
@@ -108,15 +136,6 @@
                     <div><a href="~/tin-tuc" style="font-size:13px; color:#d0efff">Tin khuyến mại</a></div>
                 </div>
                 <div class="pl-3 float-left">
-                    @*<button type="button" class="button_login" data-toggle="modal" data-target=".bd-example-modal-lg"
-                                data-whatever="" data-backdrop="static" data-keyboard="false">
-                            Đăng nhập,
-                        </button>
-
-                        <button type="button" class="button_dangky" data-toggle="modal" data-target="#exampleModal" data-backdrop="static"
-                                data-keyboard="false">
-                            Đăng ký thành viên
-                        </button>*@
                     @Html.Action("Login", "Module")
                 </div>
             </div>
@@ -130,42 +149,78 @@
                     <i class="fas fa-bars"></i>
                     &nbsp; DANH MỤC
                 </a>
-    
+
                 <nav class="main-menu" style="z-index:9999999">
                     <ul>
                         @{int i = 1; }
-                        @foreach (var c in Model@*.Take(12)*@)
+                        @foreach (var c in Model.Take(12))
                         {
                             if (c.ParentID == 0)
-                        {
-                    <li>
-                        <a href="~/@c.Slug"><i class="nicon-@i"></i> &nbsp; @c.Name</a>
-                        <ul>
-                            @foreach (var d in Model)
                             {
-                                if (c.ID == d.ParentID)
-                                {
-                                    <li>
-                                        <a href="~/@d.Slug" class="font-weight-bold">@d.Name</a>
-                                    </li>
-                                }
+                                <li>
+                                    <a href="~/@c.Slug"><i class="nicon-@i"></i> &nbsp; @c.Name</a>
+                                    <ul>
+                                        @foreach (var d in Model)
+                                        {
+                                            if (c.ID == d.ParentID)
+                                            {
+                                                <li>
+                                                    <a href="~/@d.Slug" class="font-weight-bold">@d.Name</a>
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+                                </li>
                             }
-                        </ul>
-                    </li>
-                }
-                i+=1;
-            }
+                            i += 1;
+                        }
                     </ul>
                 </nav>
             </div>
             <div class="">
-               @foreach(var t in ViewBag.Promotion)
-               {
-                <div class="promo float-left"> <a href="@t.Slug" class="text-dark text-decoration-none">@t.Title</a> </div>
-               }
-               
+                @foreach (var t in ViewBag.Promotion)
+                {
+                    <div class="promo float-left"> <a href="@t.Slug" class="text-dark text-decoration-none">@t.Title</a> </div>
+                }
             </div>
         </div>
     </div>
 </header>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.querySelector('.form-search-top input[name="key"]');
+        const suggestionsBox = document.querySelector('.search-suggestions');
+
+        searchInput.addEventListener('input', function () {
+            const query = this.value.trim();
+            if (query.length > 2) {
+                fetch(`/Site/Suggest?key=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = '';
+                        if (data.length > 0) {
+                            suggestionsBox.style.display = 'block';
+                            data.forEach(item => {
+                                const suggestionItem = document.createElement('div');
+                                suggestionItem.className = 'suggestion-item';
+                                suggestionItem.innerHTML = `<a href="/${item.Slug}">${item.Name}</a>`;
+                                suggestionsBox.appendChild(suggestionItem);
+                            });
+                        } else {
+                            suggestionsBox.style.display = 'none';
+                        }
+                    });
+            } else {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+
+        // Ẩn gợi ý khi người dùng nhấp ra ngoài
+        document.addEventListener('click', function (event) {
+            if (!searchInput.contains(event.target) && !suggestionsBox.contains(event.target)) {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+    });
+</script>
 

@@ -177,22 +177,79 @@ namespace WebsiteBanDoGiaDung.Controllers
             return View("ProductDetail", getP);
         }
 
-        public ActionResult Search(String key, int? page)
+        public ActionResult Search(string key, int? page)
         {
             int pageSize = 10;
             int pageNumber = (page ?? 1);
+
             var list = db.Products.Where(m => m.Status == 1);
-            if (String.IsNullOrEmpty(key.Trim()))
+
+            if (!string.IsNullOrEmpty(key))
             {
-                return RedirectToAction("Index", "Site");
+                var category = db.Categorys.FirstOrDefault(c => c.Name.Contains(key));
+                if (category != null)
+                {
+                    list = list.Where(m => m.CateID == category.ID).OrderByDescending(m => m.Created_at);
+                }
+                else
+                {
+                    // Tìm kiếm theo tên sách
+                    list = list.Where(m => m.Name.Contains(key));
+
+                    // Tìm kiếm theo các thông tin trong trường Specification
+                    list = list.Union(
+                        db.Products.Where(m =>
+                            (m.Specification.Contains(key) || m.Description.Contains(key)) &&
+                            !m.Name.Contains(key))
+                    ).OrderByDescending(m => m.Created_at);
+                }
             }
             else
             {
-                list = list.Where(m => m.Name.Contains(key)).OrderByDescending(m => m.Created_at);
+                return RedirectToAction("Index", "Site");
             }
+
             ViewBag.Count = list.Count();
             Session["keywords"] = key;
+
             return View(list.ToPagedList(pageNumber, pageSize));
+        }
+
+
+
+        [HttpGet]
+        public JsonResult SearchAutocomplete(string term)
+        {
+            var products = db.Products
+                .Where(p => p.Status == 1 &&
+                    (p.Name.Contains(term) ||
+                    p.Specification.Contains(term) ||
+                    p.Description.Contains(term)))
+                .Select(p => new AutocompleteSuggestion { Label = p.Name, Value = p.Slug })
+                .ToList();
+
+            return Json(products, JsonRequestBehavior.AllowGet);
+        }
+
+
+        public ActionResult Suggest(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                return Json(new List<object>(), JsonRequestBehavior.AllowGet);
+            }
+
+            var suggestions = db.Products
+                .Where(p => p.Status == 1 && p.Name.Contains(key))
+                .Take(10)
+                .Select(p => new
+                {
+                    p.Slug,
+                    p.Name
+                })
+                .ToList();
+
+            return Json(suggestions, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult Contact()
