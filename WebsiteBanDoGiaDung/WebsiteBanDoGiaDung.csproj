@@ -364,6 +364,7 @@
     <Compile Include="Library\ModelNotification.cs" />
     <Compile Include="Library\Notification.cs" />
     <Compile Include="Library\XString.cs" />
+    <Compile Include="Models\AutocompleteSuggestion.cs" />
     <Compile Include="Models\ListOrder.cs" />
     <Compile Include="Models\MCategory.cs" />
     <Compile Include="Models\MContact.cs" />
